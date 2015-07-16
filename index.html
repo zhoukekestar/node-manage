@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title>控制器</title>
+    <script src="//cdn.bootcss.com/jquery/2.1.4/jquery.min.js"></script>
+    <link rel="stylesheet" href="//cdn.bootcss.com/bootstrap/3.3.5/css/bootstrap.min.css">
+    <script src="//cdn.bootcss.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
+    <style>
+      body{
+        padding: 2em;
+      }
+      #restart {
+        margin: 4em;
+      }
+      p {
+        border: solid 1px #ccc;
+      }
+    </style>
+</head>
+<body>
+
+  <div class="text-center">
+    <button id="restart" class="btn btn-primary">重启node</button>
+  </div>
+
+  <div id="msg"></div>
+  <script>
+
+    $(function(){
+      $('#restart').click(function(){
+        $.getJSON('/restart', function(d){
+          $('#msg').append('<p>' + d.msg + '</p>');
+        });
+      });
+    })
+  </script>
+</body>
+</html>
