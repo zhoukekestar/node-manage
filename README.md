@@ -6,4 +6,3 @@
 ## Prot
 * 3000 app.js
 * 3001 manage.js
-* 3002 socket
