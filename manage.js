@@ -1,33 +1,75 @@
 
-var http  = require('http');
-var fs    = require('fs');
+var http    = require('http');
+var fs      = require('fs');
 var process = require('child_process');
-var child;
+var child   = null;
+var doing   = false;
+var WebSocketServer = require('websocket').server;
+var connection = null;
+var webSocketServer = null;
+// var spawn = require('child_process').spawn,
+//     ls    = spawn('bash', ['./node-restart.sh']);
 
-http.createServer(function (req, res) {
+// ls.stdout.on('data', function (data) {
+//   console.log('stdout: ' + data);
+// });
+
+// ls.stderr.on('data', function (data) {
+//   console.log('stderr: ' + data);
+// });
+
+// ls.on('close', function (code) {
+//   console.log('child process exited with code ' + code);
+// });
+
+
+
+var server = http.createServer(function (req, res) {
 
   // index
   if (req.url === '/') {
     res.writeHead(200, {'Content-Type': 'text/html'});
     fs.readFile('index.html', function(err, content) {
-      if (err) return callback(new Error(err));
-      content += '';
 
+      if (err) {
+        res.end('Error!')
+      }
+      content += '';
       res.end(content);
+
     });
 
   // restart
-  } else if (req.url == '/restart') {
+  } else if (req.url === '/restart') {
     res.writeHead(200, {'Content-Type': 'application/json'});
 
-    console.log('restart...')
-    child = process.execFile('./node-restart.sh', function(err, stdout, stderr) {
-      console.log('restarted!')
-      stdout = stdout.replace(/\n/g, '<br>');
-      stderr = stderr.replace(/\n/g, '<br>');
-      res.end(JSON.stringify({msg: "stdout:<br>" + stdout + '<br>stderr:<br>' + stderr}));
-    });
+
+	  console.log('restarting...')
+	  if (child !== null) {
+	    child.kill('SIGINT');
+	  }
+
+	  child = process.spawn('bash', ['./restart.sh']);
+	  child.stdout.on('data', function(d){
+	    connection.sendUTF(d);
+	  })
+		res.end(JSON.stringify({msg: "successed!"}));
+
+
+
+  // Not found
+  } else {
+    res.end('Not found.')
   }
 
-}).listen(3001, '0.0.0.0');
-console.log('Listen on local:3001');
+})
+server.listen(3001, '0.0.0.0');
+console.log('Http on 3001.');
+webSocketServer = new WebSocketServer({
+  httpServer: server
+})
+
+webSocketServer.on('request', function(request){
+  console.log('new request in')
+  connection = request.accept(null, request.origin);
+})

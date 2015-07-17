@@ -14,7 +14,7 @@
         margin: 4em;
       }
       p {
-        border: solid 1px #ccc;
+        border-bottom: solid 1px #ccc;
       }
     </style>
 </head>
@@ -33,6 +33,20 @@
           $('#msg').append('<p>' + d.msg + '</p>');
         });
       });
+
+      // 创建一个Socket实例
+      var socket = new WebSocket('ws://192.168.1.201:3001');
+
+      // 打开Socket
+      socket.onopen = function(event) {
+
+        // 监听消息
+        socket.onmessage = function(event) {
+          //console.log('Client received a message',event);
+          $('#msg').append('<p>' + event.data + '</p>');
+        };
+      };
+
     })
   </script>
 </body>

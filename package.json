@@ -1,0 +1,12 @@
+{
+  "name": "toomao-mobile",
+  "version": "1.0.0",
+  "description": "toomao web application",
+  "private": true,
+  "scripts": {
+    "start": "node ./app.js"
+  },
+  "dependencies": {
+    "websocket"     : "^1.0.19"
+  }
+}
