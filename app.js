@@ -7,5 +7,5 @@ http.createServer(function (req, res) {
   res.end('index.')
 
 
-}).listen(3000, '0.0.0.0');
-console.log('Listen on local:3000');
+}).listen(3001, '0.0.0.0');
+console.log('Listen on local:3001');

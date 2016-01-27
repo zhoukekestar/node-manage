@@ -40,7 +40,7 @@ var server = http.createServer(function (req, res) {
     });
 
   // restart
-  } else if (req.url === '/restart') {
+  } else if (req.url.indexOf('/restart') !== -1) {
     res.writeHead(200, {'Content-Type': 'application/json'});
 
 
@@ -49,7 +49,20 @@ var server = http.createServer(function (req, res) {
 	    child.kill('SIGINT');
 	  }
 
-	  child = process.spawn('bash', ['./restart.sh']);
+    var params = '';
+    try {
+      params = req.url.match(/\?p=([^\?\/=]*)/)[1];
+    } catch (e) {
+      params = '';
+    }
+
+    if (params) {
+
+      child = process.spawn('bash', ['./restart.sh', params]);
+    } else {
+      child = process.spawn('bash', ['./restart.sh']);
+    }
+    // child = process.spawn('cmd', ['./restart.cmd']);
 	  child.stdout.on('data', function(d){
 	    connection.sendUTF(d);
 	  })
@@ -59,12 +72,13 @@ var server = http.createServer(function (req, res) {
 
   // Not found
   } else {
+    res.writeHead(200, {'Content-Type': 'text'});
     res.end('Not found.')
   }
 
 })
-server.listen(3001, '0.0.0.0');
-console.log('Http on 3001.');
+server.listen(3000, '0.0.0.0');
+console.log('Http on 3000.');
 webSocketServer = new WebSocketServer({
   httpServer: server
 })

@@ -3,15 +3,20 @@
 <head lang="en">
     <meta charset="UTF-8">
     <title>控制器</title>
-    <script src="//cdn.bootcss.com/jquery/2.1.4/jquery.min.js"></script>
-    <link rel="stylesheet" href="//cdn.bootcss.com/bootstrap/3.3.5/css/bootstrap.min.css">
-    <script src="//cdn.bootcss.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
     <style>
       body{
         padding: 2em;
       }
-      #restart {
-        margin: 4em;
+      .btns {
+        text-align: center;
+      }
+      .btns button {
+        background: #00A4FF;
+        border: none;
+        padding: 10px;
+        border-radius: 5px;
+        color: #fff;
+        margin: 0 20px;
       }
       p {
         border-bottom: solid 1px #ccc;
@@ -19,35 +24,47 @@
     </style>
 </head>
 <body>
-
-  <div class="text-center">
-    <button id="restart" class="btn btn-primary">重启node</button>
+  <div class="btns">
+    <button onclick="restart('log.toomao.com')">重启log.toomao.com</button>
+    <button onclick="restart('admin.toomao.com')">重启admin.toomao.com</button>
+    <button onclick="restart('m.toomao.com')">重启m.toomao.com</button>
+    <button onclick="restart('www.toomao.com')">重启www.toomao.com</button>
   </div>
-
   <div id="msg"></div>
   <script>
+    window.append = function(msg) {
+      var p = document.createElement('p')
+      p.innerHTML = msg;
+      document.querySelector('#msg').appendChild(p);
+      document.body.scrollTop = 1000000;
+    }
+    window.restart = function(params) {
+      var xmlHttp = new XMLHttpRequest()
+      xmlHttp.open("GET", '/restart?p=' + params, true);
+      xmlHttp.setRequestHeader('Content-Type', 'application/json');
+      xmlHttp.onreadystatechange = function(){
+        if (xmlHttp.readyState === 4) {
+          console.log(xmlHttp.responseText);
+          append(JSON.parse(xmlHttp.responseText).msg)
+        }
+      }
+      xmlHttp.send(null);
+    }
 
-    $(function(){
-      $('#restart').click(function(){
-        $.getJSON('/restart', function(d){
-          $('#msg').append('<p>' + d.msg + '</p>');
-        });
-      });
+    // 创建一个Socket实例
+    var socket = new WebSocket('ws://' + location.host);
 
-      // 创建一个Socket实例
-      var socket = new WebSocket('ws://192.168.1.201:3001');
+    // 打开Socket
+    socket.onopen = function(event) {
 
-      // 打开Socket
-      socket.onopen = function(event) {
-
-        // 监听消息
-        socket.onmessage = function(event) {
-          //console.log('Client received a message',event);
-          $('#msg').append('<p>' + event.data + '</p>');
-        };
+      // 监听消息
+      socket.onmessage = function(event) {
+        //console.log('Client received a message',event);
+        
+        event.data = event.data.replace(/[\n\r]/g, '<br>');
+        append(event.data);
       };
-
-    })
+    };
   </script>
 </body>
 </html>
